@@ -60,4 +60,8 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
 
   Future<void> setIsReminderEnabled(bool v) =>
     setSetting('reminder_enabled', v.toString());
+
+  Future<String?> getProfileImage() => getSetting('profile_image');
+
+  Future<void> setProfileImage(String path) => setSetting('profile_image', path);
 }

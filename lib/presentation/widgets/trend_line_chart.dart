@@ -5,7 +5,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/widgets/glass_card.dart';
 import '../../core/widgets/shimmer_box.dart';
 import '../../core/utils/formatter.dart';
 import '../../domain/providers/analytics_providers.dart';

@@ -12,9 +12,6 @@ import '../../../domain/providers/dashboard_providers.dart';
 import '../../../domain/providers/analytics_providers.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/trend_line_chart.dart';
-import '../../widgets/income_expense_bar.dart';
-import '../../widgets/category_bar_chart.dart';
-import '../../widgets/stats_card.dart';
 import '../../widgets/transaction_list_tile.dart';
 import '../../widgets/error_card.dart';
 

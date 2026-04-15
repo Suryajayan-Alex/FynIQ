@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -22,10 +23,11 @@ class BalanceHeroCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final summaryAsync = ref.watch(spendingSummaryProvider);
     final userNameAsync = ref.watch(userNameProvider);
+    final profileImageAsync = ref.watch(profileImageProvider);
 
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -70,16 +72,24 @@ class BalanceHeroCard extends ConsumerWidget {
                         border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
                         color: Colors.white.withOpacity(0.2),
                       ),
-                      child: Center(
-                        child: userNameAsync.when(
-                          data: (name) => Text(
-                            (name != null && name.isNotEmpty) ? name[0].toUpperCase() : 'U',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
+                      child: ClipOval(
+                        child: profileImageAsync.when(
+                          data: (path) => path != null && File(path).existsSync()
+                              ? Image.file(File(path), fit: BoxFit.cover, width: 44, height: 44)
+                              : userNameAsync.when(
+                                  data: (name) => Center(
+                                    child: Text(
+                                      (name != null && name.isNotEmpty) ? name[0].toUpperCase() : 'U',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                  loading: () => const Icon(Icons.person, color: Colors.white, size: 20),
+                                  error: (_, __) => const Icon(Icons.person, color: Colors.white, size: 20),
+                                ),
                           loading: () => const Icon(Icons.person, color: Colors.white, size: 20),
                           error: (_, __) => const Icon(Icons.person, color: Colors.white, size: 20),
                         ),

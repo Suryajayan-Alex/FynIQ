@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -43,6 +45,7 @@ class _ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final nameAsync = ref.watch(userNameProvider);
+    final imageAsync = ref.watch(profileImageProvider);
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -50,21 +53,32 @@ class _ProfileHeader extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Row(
           children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(colors: [FyniqColors.primaryAccent, FyniqColors.highlightCTA]),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: nameAsync.when(
-                  data: (name) => Text(
-                    (name?.isNotEmpty == true) ? name![0].toUpperCase() : 'F',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.w800, color: FyniqColors.textPrimary),
+            GestureDetector(
+              onTap: () => _pickImage(context, ref),
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(colors: [FyniqColors.primaryAccent, FyniqColors.highlightCTA]),
+                  shape: BoxShape.circle,
+                ),
+                child: ClipOval(
+                  child: imageAsync.when(
+                    data: (path) => path != null && File(path).existsSync()
+                        ? Image.file(File(path), fit: BoxFit.cover, width: 56, height: 56)
+                        : Center(
+                            child: nameAsync.when(
+                              data: (name) => Text(
+                                (name?.isNotEmpty == true) ? name![0].toUpperCase() : 'F',
+                                style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.w800, color: FyniqColors.textPrimary),
+                              ),
+                              loading: () => const SizedBox(),
+                              error: (_, __) => const Text('F', style: TextStyle(color: FyniqColors.textPrimary)),
+                            ),
+                          ),
+                    loading: () => const SizedBox(),
+                    error: (_, __) => const Icon(Icons.person, color: Colors.white),
                   ),
-                  loading: () => const SizedBox(),
-                  error: (_, __) => const Text('F', style: TextStyle(color: FyniqColors.textPrimary)),
                 ),
               ),
             ),
@@ -91,6 +105,16 @@ class _ProfileHeader extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _pickImage(BuildContext context, WidgetRef ref) async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+    
+    if (image != null) {
+      await ref.read(settingsRepositoryProvider).setProfileImage(image.path);
+      ref.invalidate(profileImageProvider);
+    }
   }
 
   void _editName(BuildContext context, WidgetRef ref) {

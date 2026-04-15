@@ -84,3 +84,7 @@ final balanceVisibleProvider = StateProvider<bool>((ref) => true);
 final userNameProvider = FutureProvider.autoDispose<String?>((ref) {
   return ref.read(settingsRepositoryProvider).getUserName();
 });
+
+final profileImageProvider = FutureProvider.autoDispose<String?>((ref) {
+  return ref.read(settingsRepositoryProvider).getProfileImage();
+});

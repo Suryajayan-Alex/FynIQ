@@ -58,7 +58,7 @@ Future<void> _runBackgroundTasks(ProviderContainer container, NotificationServic
 
     if (count > 0) {
       final notifRepo = container.read(notificationRepositoryProvider);
-      final title = '🔁 Auto-logged!';
+      const title = '🔁 Auto-logged!';
       final body = '$count recurring expense(s) auto-logged. Stay sharp.';
       
       await notificationService.plugin.show(

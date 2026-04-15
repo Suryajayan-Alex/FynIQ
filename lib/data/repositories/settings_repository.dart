@@ -33,4 +33,8 @@ class SettingsRepository {
   Future<bool> getIsReminderEnabled() => _dao.getIsReminderEnabled();
 
   Future<void> setIsReminderEnabled(bool v) => _dao.setIsReminderEnabled(v);
+
+  Future<String?> getProfileImage() => _dao.getProfileImage();
+
+  Future<void> setProfileImage(String path) => _dao.setProfileImage(path);
 }

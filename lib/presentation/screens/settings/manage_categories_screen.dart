@@ -17,69 +17,87 @@ class ManageCategoriesScreen extends ConsumerWidget {
     final categoriesAsync = ref.watch(allCategoriesProvider);
 
     return FyniqScaffold(
-      appBar: AppBar(
-        title: Text("Categories 🏷️", style: FyniqTextStyles.headingM),
-        actions: [
-          IconButton(
-            icon: const Icon(Iconsax.add, color: FyniqColors.primaryAccent),
-            onPressed: () => showAddCategorySheet(context, ref),
-          ),
-        ],
-      ),
       body: categoriesAsync.when(
-        data: (cats) => ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          itemCount: cats.length,
-          itemBuilder: (context, i) {
-            final cat = cats[i];
-            final catColor = Color(int.parse(cat.colorHex.replaceAll('#', '0xFF')));
+        data: (cats) => CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              floating: true,
+              pinned: true,
+              backgroundColor: FyniqColors.background.withOpacity(0.8),
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              centerTitle: true,
+              title: Text("Categories 🏷️", style: FyniqTextStyles.headingM),
+              leading: IconButton(
+                icon: const Icon(Iconsax.arrow_left_1, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Iconsax.add, color: FyniqColors.primaryAccent),
+                  onPressed: () => showAddCategorySheet(context, ref),
+                ),
+              ],
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) {
+                    final cat = cats[i];
+                    final catColor = Color(int.parse(cat.colorHex.replaceAll('#', '0xFF')));
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: GlassCard(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: catColor.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: GlassCard(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: catColor.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Center(child: Text(cat.emoji, style: const TextStyle(fontSize: 22))),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                cat.name,
+                                style: FyniqTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                            if (!cat.isDefault)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Iconsax.edit_2, color: FyniqColors.textSecondary, size: 20),
+                                    onPressed: () {
+                                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Editing cat coming soon")));
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Iconsax.trash, color: FyniqColors.highlightCTA, size: 20),
+                                    onPressed: () => _confirmDelete(context, ref, cat),
+                                  ),
+                                ],
+                              )
+                            else
+                              Text("Default", style: FyniqTextStyles.caption.copyWith(color: Colors.grey)),
+                          ],
+                        ),
                       ),
-                      child: Center(child: Text(cat.emoji, style: const TextStyle(fontSize: 22))),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        cat.name,
-                        style: FyniqTextStyles.body.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    if (!cat.isDefault)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Iconsax.edit_2, color: FyniqColors.textSecondary, size: 20),
-                            onPressed: () {
-                               // edit sheet could also be showAddCategorySheet with optional cat
-                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Editing cat coming soon")));
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Iconsax.trash, color: FyniqColors.highlightCTA, size: 20),
-                            onPressed: () => _confirmDelete(context, ref, cat),
-                          ),
-                        ],
-                      )
-                    else
-                      Text("Default", style: FyniqTextStyles.caption.copyWith(color: Colors.grey)),
-                  ],
+                    );
+                  },
+                  childCount: cats.length,
                 ),
               ),
-            );
-          },
+            ),
+          ],
         ),
         loading: () => const _ShimmerList(),
         error: (_, __) => const Center(child: Text("Error categories")),
