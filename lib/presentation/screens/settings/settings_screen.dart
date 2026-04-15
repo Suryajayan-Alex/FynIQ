@@ -420,7 +420,7 @@ class _AboutGroup extends StatelessWidget {
         _SettingsRow(
           icon: Iconsax.heart,
           title: "Open Source",
-          subtitle: "Inspired by Dime — open source finance",
+          subtitle: "Built with ❤️ for everyone",
           onTap: () {
             showAboutDialog(
               context: context,
@@ -429,7 +429,7 @@ class _AboutGroup extends StatelessWidget {
               applicationVersion: "1.0.0",
               applicationLegalese: "MIT License",
               children: [
-                const Text("Fyniq is inspired by Dime, a beautifully designed open-source finance tracker."),
+                const Text("Fyniq is a powerful, local-first finance tracker helping you outsmart your spending."),
               ],
             );
           },

@@ -97,4 +97,4 @@ FynIQ is an open-source project. If you'd like to contribute, please fork the re
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-*Inspired by a passion for clean design and financial empowerment.*
+*Empowering you to stay master of your financial journey through beautiful design and local-first technology.*
