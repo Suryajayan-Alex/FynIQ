@@ -7,6 +7,7 @@ import 'daos/categories_dao.dart';
 import 'daos/transactions_dao.dart';
 import 'daos/budgets_dao.dart';
 import 'daos/settings_dao.dart';
+import 'daos/notifications_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -61,20 +62,37 @@ class AppSettings extends Table {
   Set<Column> get primaryKey => {key};
 }
 
+@DataClassName('InAppNotification')
+class InAppNotifications extends Table {
+  TextColumn get id => text()();
+  TextColumn get title => text()();
+  TextColumn get body => text()();
+  IntColumn get date => integer()(); // epoch ms
+  BoolColumn get isRead => boolean().withDefault(const Constant(false))();
+  TextColumn get type => text()(); // 'budget', 'recurring', 'system'
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
-  tables: [Categories, Transactions, Budgets, AppSettings],
-  daos: [CategoriesDao, TransactionsDao, BudgetsDao, SettingsDao],
+  tables: [Categories, Transactions, Budgets, AppSettings, InAppNotifications],
+  daos: [CategoriesDao, TransactionsDao, BudgetsDao, SettingsDao, NotificationsDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async {
           await m.createAll();
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.createTable(inAppNotifications);
+          }
         },
       );
 }

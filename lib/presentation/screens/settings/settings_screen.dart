@@ -11,6 +11,7 @@ import '../../../core/widgets/shimmer_box.dart';
 import '../../../core/utils/csv_exporter.dart';
 import '../../../domain/providers/dashboard_providers.dart';
 import '../../../domain/providers/database_providers.dart';
+import '../../../core/services/notification_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -60,10 +61,10 @@ class _ProfileHeader extends StatelessWidget {
                 child: nameAsync.when(
                   data: (name) => Text(
                     (name?.isNotEmpty == true) ? name![0].toUpperCase() : 'F',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white),
+                    style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.w800, color: FyniqColors.textPrimary),
                   ),
                   loading: () => const SizedBox(),
-                  error: (_, __) => const Text('F', style: TextStyle(color: Colors.white)),
+                  error: (_, __) => const Text('F', style: TextStyle(color: FyniqColors.textPrimary)),
                 ),
               ),
             ),
@@ -78,7 +79,7 @@ class _ProfileHeader extends StatelessWidget {
                     error: (_, __) => Text("Fyniq User", style: FyniqTextStyles.headingM),
                   ),
                   const SizedBox(height: 2),
-                  Text("outsmart your spending.", style: FyniqTextStyles.caption.copyWith(color: Colors.grey)),
+                  Text("outsmart your spending.", style: FyniqTextStyles.caption.copyWith(color: FyniqColors.textSecondary)),
                 ],
               ),
             ),
@@ -97,7 +98,6 @@ class _ProfileHeader extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: FyniqColors.cardSurface,
         title: const Text("Your Name"),
         content: TextField(
           controller: controller,
@@ -133,7 +133,7 @@ class _SettingsGroup extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: FyniqTextStyles.caption.copyWith(color: Colors.grey, fontWeight: FontWeight.w700)),
+          Text(title, style: FyniqTextStyles.caption.copyWith(color: FyniqColors.textSecondary, fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           GlassCard(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -237,11 +237,22 @@ final biometricEnabledProvider = FutureProvider<bool>((ref) {
   return ref.watch(settingsRepositoryProvider).getIsBiometricEnabled();
 });
 
-class _NotificationsGroup extends StatelessWidget {
+final reminderEnabledProvider = FutureProvider<bool>((ref) {
+  return ref.watch(settingsRepositoryProvider).getIsReminderEnabled();
+});
+
+final reminderTimeProvider = FutureProvider<TimeOfDay?>((ref) {
+  return ref.watch(settingsRepositoryProvider).getReminderTime();
+});
+
+class _NotificationsGroup extends ConsumerWidget {
   const _NotificationsGroup();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reminderAsync = ref.watch(reminderEnabledProvider);
+    final timeAsync = ref.watch(reminderTimeProvider);
+
     return _SettingsGroup(
       title: "Notifications 🔔",
       children: [
@@ -249,10 +260,60 @@ class _NotificationsGroup extends StatelessWidget {
           icon: Iconsax.notification,
           title: "Daily Reminder",
           subtitle: "Remind me to log my spends",
-          trailing: Switch(value: false, onChanged: (_) {}),
+          trailing: Switch(
+            value: reminderAsync.value ?? false,
+            activeThumbColor: FyniqColors.primaryAccent,
+            onChanged: (val) => _toggleReminder(context, val, ref),
+          ),
         ),
+        if (reminderAsync.value == true)
+          _SettingsRow(
+            icon: Iconsax.clock,
+            title: "Reminder Time",
+            subtitle: timeAsync.when(
+              data: (t) => t != null ? "${t.hourOfPeriod}:${t.minute.toString().padLeft(2, '0')} ${t.period == DayPeriod.am ? 'AM' : 'PM'}" : "Set time",
+              loading: () => "...",
+              error: (_, __) => "Set time",
+            ),
+            trailing: const Icon(Iconsax.edit, size: 18, color: FyniqColors.primaryAccent),
+            onTap: () => _pickTime(context, ref),
+          ),
       ],
     );
+  }
+
+  Future<void> _toggleReminder(BuildContext context, bool enable, WidgetRef ref) async {
+    if (enable) {
+      await _pickTime(context, ref);
+    } else {
+      await ref.read(settingsRepositoryProvider).setIsReminderEnabled(false);
+      await NotificationService.instance.cancelDailyReminder();
+      ref.invalidate(reminderEnabledProvider);
+    }
+  }
+
+  Future<void> _pickTime(BuildContext context, WidgetRef ref) async {
+    final curTime = ref.read(reminderTimeProvider).value ?? const TimeOfDay(hour: 20, minute: 0);
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: curTime,
+    );
+
+    if (picked != null) {
+      final repo = ref.read(settingsRepositoryProvider);
+      await repo.setReminderTime(picked);
+      await repo.setIsReminderEnabled(true);
+      
+      final name = await repo.getUserName() ?? "";
+      await NotificationService.instance.scheduleDailyReminder(picked, name);
+      
+      ref.invalidate(reminderEnabledProvider);
+      ref.invalidate(reminderTimeProvider);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Reminder scheduled! 🔔")));
+      }
+    }
   }
 }
 
@@ -267,14 +328,14 @@ class _DataGroup extends ConsumerWidget {
         _SettingsRow(
           icon: Iconsax.document,
           title: "Manage Categories",
-          trailing: const Icon(Iconsax.arrow_right_3, size: 18, color: Colors.grey),
+          trailing: const Icon(Iconsax.arrow_right_3, size: 18, color: FyniqColors.textSecondary),
           onTap: () => context.push('/manage-categories'),
         ),
         _SettingsRow(
           icon: Iconsax.export,
           title: "Export Data",
           subtitle: "Save all transactions as CSV",
-          trailing: const Icon(Iconsax.arrow_right_3, size: 18, color: Colors.grey),
+          trailing: const Icon(Iconsax.arrow_right_3, size: 18, color: FyniqColors.textSecondary),
           onTap: () async {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Exporting data... ⏳")));
             await CsvExporter.export(ref);
@@ -333,7 +394,7 @@ class _DataGroup extends ConsumerWidget {
                          }
                       }
                     : null,
-                child: Text("RESET ALL", style: TextStyle(color: controller.text == "DELETE" ? FyniqColors.highlightCTA : Colors.grey)),
+                child: Text("RESET ALL", style: TextStyle(color: controller.text == "DELETE" ? FyniqColors.highlightCTA : FyniqColors.textSecondary)),
               ),
             ],
           );
@@ -354,7 +415,7 @@ class _AboutGroup extends StatelessWidget {
         const _SettingsRow(
           icon: Iconsax.info_circle,
           title: "Version",
-          trailing: Text("1.0.0", style: TextStyle(color: Colors.grey, fontSize: 12)),
+          trailing: Text("1.0.0", style: TextStyle(color: FyniqColors.textSecondary, fontSize: 12)),
         ),
         _SettingsRow(
           icon: Iconsax.heart,
@@ -364,6 +425,7 @@ class _AboutGroup extends StatelessWidget {
             showAboutDialog(
               context: context,
               applicationName: "Fyniq",
+              applicationIcon: ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.asset('assets/images/fyniq_logo.png', width: 48, height: 48)),
               applicationVersion: "1.0.0",
               applicationLegalese: "MIT License",
               children: [

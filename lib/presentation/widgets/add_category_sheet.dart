@@ -65,7 +65,7 @@ class _AddCategorySheetState extends State<AddCategorySheet> {
             const SizedBox(height: 16),
             Text("New Category", style: FyniqTextStyles.headingM),
             const SizedBox(height: 16),
-            const Text("Pick an emoji", style: TextStyle(color: Colors.grey, fontSize: 12)),
+            const Text("Pick an emoji", style: TextStyle(color: FyniqColors.textSecondary, fontSize: 12)),
             const SizedBox(height: 8),
             GestureDetector(
               onTap: _showEmojiPicker,
@@ -81,7 +81,7 @@ class _AddCategorySheetState extends State<AddCategorySheet> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text("Category name", style: TextStyle(color: Colors.grey, fontSize: 12)),
+            const Text("Category name", style: TextStyle(color: FyniqColors.textSecondary, fontSize: 12)),
             const SizedBox(height: 8),
             TextField(
               controller: _nameController,
@@ -90,7 +90,7 @@ class _AddCategorySheetState extends State<AddCategorySheet> {
               decoration: const InputDecoration(hintText: "e.g. Shopping"),
             ),
             const SizedBox(height: 16),
-            const Text("Pick a color", style: TextStyle(color: Colors.grey, fontSize: 12)),
+            const Text("Pick a color", style: TextStyle(color: FyniqColors.textSecondary, fontSize: 12)),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -104,9 +104,9 @@ class _AddCategorySheetState extends State<AddCategorySheet> {
                     decoration: BoxDecoration(
                       color: color,
                       shape: BoxShape.circle,
-                      border: isSelected ? Border.all(color: Colors.white, width: 2) : null,
+                      border: isSelected ? Border.all(color: FyniqColors.textPrimary, width: 2) : null,
                     ),
-                    child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 16) : null,
+                    child: isSelected ? const Icon(Icons.check, color: FyniqColors.textPrimary, size: 16) : null,
                   ),
                 );
               }).toList(),
@@ -146,7 +146,7 @@ class _AddCategorySheetState extends State<AddCategorySheet> {
         config: const Config(
           height: 256,
           emojiViewConfig: EmojiViewConfig(
-              backgroundColor: FyniqColors.background,
+              backgroundColor: FyniqColors.backgroundAlt,
               columns: 7,
           ),
         ),

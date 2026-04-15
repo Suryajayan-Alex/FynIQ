@@ -9,10 +9,37 @@ final filterTypeProvider = StateProvider<String>((ref) => 'all');
 
 final sortOrderProvider = StateProvider<String>((ref) => 'newest'); 
 
-final spendingTrendProvider = FutureProvider.autoDispose<List<DailySpend>>((ref) {
+final spendingTrendProvider = FutureProvider.autoDispose<List<DailySpend>>((ref) async {
   final range = ref.watch(dateRangeProvider);
   final repo = ref.watch(transactionRepositoryProvider);
-  return repo.getDailySpends(range.start, range.end);
+  final period = ref.watch(selectedPeriodProvider);
+  
+  final daily = await repo.getDailySpends(range.start, range.end);
+  
+  if (period == 'year') {
+    // Aggregate by month for clearer trend
+    final Map<int, DailySpend> monthlyMap = {};
+    for (int i = 1; i <= 12; i++) {
+        monthlyMap[i] = DailySpend(
+          date: DateTime(range.start.year, i, 1),
+          totalExpense: 0,
+          totalIncome: 0,
+        );
+    }
+
+    for (var d in daily) {
+      final monthIndex = d.date.month;
+      final current = monthlyMap[monthIndex]!;
+      monthlyMap[monthIndex] = DailySpend(
+        date: current.date,
+        totalExpense: current.totalExpense + d.totalExpense,
+        totalIncome: current.totalIncome + d.totalIncome,
+      );
+    }
+    return monthlyMap.values.toList()..sort((a, b) => a.date.compareTo(b.date));
+  }
+  
+  return daily;
 });
 
 class AnalyticsStats {

@@ -131,7 +131,7 @@ class _OverallSummaryCard extends ConsumerWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Total Budget", style: FyniqTextStyles.caption.copyWith(color: Colors.grey)),
+                          Text("Total Budget", style: FyniqTextStyles.caption.copyWith(color: FyniqColors.textSecondary)),
                           Text(FyniqFormatter.formatCurrency(totalLimit),
                               style: FyniqTextStyles.body.copyWith(fontWeight: FontWeight.w700, fontSize: 18)),
                         ],
@@ -140,7 +140,7 @@ class _OverallSummaryCard extends ConsumerWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text("Total Spent", style: FyniqTextStyles.caption.copyWith(color: Colors.grey)),
+                          Text("Total Spent", style: FyniqTextStyles.caption.copyWith(color: FyniqColors.textSecondary)),
                           Text(FyniqFormatter.formatCurrency(totalSpent),
                               style: FyniqTextStyles.body.copyWith(
                                   fontWeight: FontWeight.w700, fontSize: 18, color: FyniqColors.highlightCTA)),
@@ -205,7 +205,7 @@ class _BudgetList extends ConsumerWidget {
                       builder: (dCtx) => AlertDialog(
                         backgroundColor: FyniqColors.cardSurface,
                         title: Text("Delete Budget?", style: FyniqTextStyles.headingM),
-                        content: const Text("This can't be undone. You sure?", style: TextStyle(color: Colors.white)),
+                        content: const Text("This can't be undone. You sure?", style: TextStyle(color: FyniqColors.textPrimary)),
                         actions: [
                           TextButton(onPressed: () => Navigator.pop(dCtx, false), child: const Text("Cancel")),
                           TextButton(
@@ -261,7 +261,7 @@ class _EmptyBudgets extends StatelessWidget {
         Text("No active budgets", style: FyniqTextStyles.headingM),
         const SizedBox(height: 8),
         Text("Track limits per category to stay in control.",
-            style: FyniqTextStyles.caption.copyWith(color: Colors.grey), textAlign: TextAlign.center),
+            style: FyniqTextStyles.caption.copyWith(color: FyniqColors.textSecondary), textAlign: TextAlign.center),
       ],
     );
   }

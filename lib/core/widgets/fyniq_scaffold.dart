@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class FyniqScaffold extends StatelessWidget {
   final Widget body;
@@ -29,16 +30,7 @@ class FyniqScaffold extends StatelessWidget {
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0D0D1A),
-              Color(0xFF1A1A2E),
-              Color(0xFF0D0D1A),
-            ],
-            stops: [0.0, 0.5, 1.0],
-          ),
+          color: FyniqColors.background,
         ),
         child: body,
       ),

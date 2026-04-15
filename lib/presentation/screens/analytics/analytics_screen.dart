@@ -10,6 +10,7 @@ import '../../../core/widgets/shimmer_box.dart';
 import '../../../core/utils/formatter.dart';
 import '../../../domain/providers/dashboard_providers.dart';
 import '../../../domain/providers/analytics_providers.dart';
+import 'package:intl/intl.dart';
 import '../../widgets/trend_line_chart.dart';
 import '../../widgets/income_expense_bar.dart';
 import '../../widgets/category_bar_chart.dart';
@@ -22,6 +23,9 @@ class AnalyticsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final spendingSummary = ref.watch(spendingSummaryProvider);
+    final filter = ref.watch(filterTypeProvider);
+
     return FyniqScaffold(
       body: SafeArea(
         child: RefreshIndicator(
@@ -36,33 +40,102 @@ class AnalyticsScreen extends ConsumerWidget {
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              SliverToBoxAdapter(child: _buildHeader(context).animate().fadeIn().slideY(begin: -0.1)),
-              SliverToBoxAdapter(child: _PeriodSelector().animate(delay: 100.ms).fadeIn().slideX(begin: 0.1)),
+              // ── Header (Statistics) ──
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        onPressed: () => context.go('/home/dashboard'),
+                        icon: const Icon(Iconsax.arrow_left_1, color: Colors.white),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.white.withOpacity(0.05),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                      Text("Statistics", style: FyniqTextStyles.headingM),
+                      IconButton(
+                        onPressed: () {}, // Share action or similar
+                        icon: const Icon(Iconsax.export, color: Colors.white),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.white.withOpacity(0.05),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ── Centered Amount ──
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  child: Column(
+                    children: [
+                      spendingSummary.when(
+                        data: (summary) {
+                          double displayAmount = 0;
+                          Color displayColor = Colors.white;
+                          String sign = "";
+                          
+                          if (filter == 'all') {
+                            displayAmount = summary.netBalance.abs();
+                            displayColor = summary.netBalance < 0 ? FyniqColors.warning : Colors.white;
+                            sign = summary.netBalance < 0 ? "-" : "";
+                          } else if (filter == 'expense') {
+                            displayAmount = summary.totalExpense;
+                            displayColor = FyniqColors.warning;
+                            sign = "";
+                          } else { // income
+                            displayAmount = summary.totalIncome;
+                            displayColor = FyniqColors.success;
+                            sign = "";
+                          }
+
+                          return Text(
+                            "$sign₹${FyniqFormatter.formatAmount(displayAmount)}",
+                            style: FyniqTextStyles.headingXL.copyWith(
+                              fontSize: 40,
+                              color: displayColor,
+                            ),
+                          );
+                        },
+                        loading: () => const ShimmerBox(width: 200, height: 48),
+                        error: (_, __) => Text("Rs. 0.00", style: FyniqTextStyles.headingXL),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        DateFormat('MMM d, yyyy').format(ref.watch(selectedDateProvider)),
+                        style: FyniqTextStyles.caption.copyWith(color: FyniqColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ── Period Selector (Week, Month, Year) ──
+              SliverToBoxAdapter(child: _PeriodSelector().animate(delay: 100.ms).fadeIn()),
+
+              // ── Trend Line Chart ──
               SliverToBoxAdapter(
                 child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                   child: TrendLineChart(),
-                ).animate(delay: 200.ms).fadeIn().slideY(begin: 0.1),
+                ).animate(delay: 200.ms).fadeIn(),
               ),
+
               SliverToBoxAdapter(
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                  child: IncomeExpenseBar(),
-                ).animate(delay: 300.ms).fadeIn().slideY(begin: 0.1),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                  child: Text("Top Spending", style: FyniqTextStyles.headingM),
+                ),
               ),
-              SliverToBoxAdapter(
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                  child: CategoryBarChartCard(),
-                ).animate(delay: 400.ms).fadeIn().slideY(begin: 0.1),
-              ),
-              SliverToBoxAdapter(
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                  child: StatsCardsRow(),
-                ).animate(delay: 500.ms).fadeIn().slideY(begin: 0.1),
-              ),
-              SliverToBoxAdapter(child: _buildFilterSortRow(ref).animate(delay: 600.ms).fadeIn()),
+
+              SliverToBoxAdapter(child: _buildFilterSortRow(ref)),
+              
               _buildFilteredTransactionList(ref),
               const SliverToBoxAdapter(child: SizedBox(height: 140)),
             ],
@@ -72,83 +145,48 @@ class AnalyticsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Insight Zone 🧠", style: FyniqTextStyles.caption),
-              const SizedBox(height: 4),
-              Text("Analyzing your moves.", style: FyniqTextStyles.headingM),
-            ],
-          ),
-          IconButton(
-            tooltip: 'Go back to dashboard',
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              context.go('/home/dashboard');
-            },
-            icon: const Icon(Iconsax.arrow_right_1, color: FyniqColors.textPrimary),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildFilterSortRow(WidgetRef ref) {
     final filter = ref.watch(filterTypeProvider);
     final sort = ref.watch(sortOrderProvider);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
       child: Row(
         children: [
           ...['all', 'expense', 'income'].map((type) => Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: Semantics(
-                  label: 'Filter by $type',
+                child: ChoiceChip(
+                  label: Text(type.toUpperCase()),
                   selected: filter == type,
-                  button: true,
-                  child: ChoiceChip(
-                    label: Text(type.toUpperCase()),
-                    selected: filter == type,
-                    onSelected: (val) {
-                      HapticFeedback.lightImpact();
-                      if (val) ref.read(filterTypeProvider.notifier).state = type;
-                    },
-                    selectedColor: FyniqColors.primaryAccent.withOpacity(0.3),
-                    checkmarkColor: FyniqColors.primaryAccent,
-                    backgroundColor: FyniqColors.cardSurface,
-                    labelStyle: FyniqTextStyles.caption.copyWith(
-                      color: filter == type ? FyniqColors.primaryAccent : Colors.grey,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  onSelected: (val) {
+                    HapticFeedback.lightImpact();
+                    if (val) ref.read(filterTypeProvider.notifier).state = type;
+                  },
+                  selectedColor: FyniqColors.primaryAccent.withOpacity(0.3),
+                  checkmarkColor: FyniqColors.primaryAccent,
+                  backgroundColor: FyniqColors.cardSurface,
+                  labelStyle: FyniqTextStyles.caption.copyWith(
+                    color: filter == type ? FyniqColors.primaryAccent : FyniqColors.textSecondary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               )),
           const Spacer(),
-          Semantics(
-            label: 'Sort transactions',
-            child: DropdownButton<String>(
-              value: sort,
-              dropdownColor: FyniqColors.cardSurface,
-              icon: const Icon(Iconsax.sort, color: Colors.grey, size: 20),
-              underline: const SizedBox(),
-              onChanged: (v) {
-                HapticFeedback.lightImpact();
-                ref.read(sortOrderProvider.notifier).state = v!;
-              },
-              items: const [
-                DropdownMenuItem(value: "newest", child: Text("Newest", style: TextStyle(fontSize: 12))),
-                DropdownMenuItem(value: "oldest", child: Text("Oldest", style: TextStyle(fontSize: 12))),
-                DropdownMenuItem(value: "highest", child: Text("Highest", style: TextStyle(fontSize: 12))),
-                DropdownMenuItem(value: "lowest", child: Text("Lowest", style: TextStyle(fontSize: 12))),
-              ],
-            ),
+          DropdownButton<String>(
+            value: sort,
+            dropdownColor: FyniqColors.cardSurface,
+            icon: const Icon(Iconsax.sort, color: FyniqColors.textSecondary, size: 20),
+            underline: const SizedBox(),
+            onChanged: (v) {
+              HapticFeedback.lightImpact();
+              ref.read(sortOrderProvider.notifier).state = v!;
+            },
+            items: const [
+              DropdownMenuItem(value: "newest", child: Text("Newest", style: TextStyle(fontSize: 12, color: FyniqColors.textPrimary))),
+              DropdownMenuItem(value: "oldest", child: Text("Oldest", style: TextStyle(fontSize: 12, color: FyniqColors.textPrimary))),
+              DropdownMenuItem(value: "highest", child: Text("Highest", style: TextStyle(fontSize: 12, color: FyniqColors.textPrimary))),
+              DropdownMenuItem(value: "lowest", child: Text("Lowest", style: TextStyle(fontSize: 12, color: FyniqColors.textPrimary))),
+            ],
           ),
         ],
       ),
@@ -247,37 +285,44 @@ class _PeriodSelector extends ConsumerWidget {
     final selectedPeriod = ref.watch(selectedPeriodProvider);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(30),
+        ),
         child: Row(
-          children: ['today', 'week', 'month', 'year'].map((period) {
+          children: ['week', 'month', 'year'].map((period) {
             final isSelected = selectedPeriod == period;
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Semantics(
-                label: 'View $period stats',
-                selected: isSelected,
-                button: true,
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    ref.read(selectedPeriodProvider.notifier).state = period;
-                  },
-                  child: AnimatedContainer(
-                    duration: 200.ms,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      gradient: isSelected
-                          ? const LinearGradient(colors: [FyniqColors.primaryAccent, FyniqColors.highlightCTA])
-                          : null,
-                      color: !isSelected ? FyniqColors.cardSurface : null,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+            return Expanded(
+              child: GestureDetector(
+                onTap: () {
+                   HapticFeedback.selectionClick();
+                   ref.read(selectedPeriodProvider.notifier).state = period;
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.black : Colors.transparent,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: isSelected ? [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      )
+                    ] : [],
+                  ),
+                  child: Center(
                     child: Text(
-                      FyniqFormatter.formatPeriodLabel(period),
-                      style: FyniqTextStyles.body.copyWith(
-                        fontWeight: FontWeight.w600,
+                      period.toUpperCase(),
+                      style: FyniqTextStyles.caption.copyWith(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.1,
+                        fontSize: 11,
                         color: isSelected ? Colors.white : FyniqColors.textSecondary,
                       ),
                     ),

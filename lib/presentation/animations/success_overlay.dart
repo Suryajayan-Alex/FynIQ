@@ -26,7 +26,7 @@ Future<void> showSuccessOverlay(BuildContext context, String message) async {
                   ),
                 ],
               ),
-              child: const Icon(Icons.check_rounded, color: Colors.white, size: 40),
+              child: const Icon(Icons.check_rounded, color: FyniqColors.textPrimary, size: 40),
             ).animate().scale(begin: const Offset(0.3, 0.3), curve: Curves.elasticOut, duration: 600.ms),
             const SizedBox(height: 16),
             Text(

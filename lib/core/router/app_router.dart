@@ -8,6 +8,7 @@ import '../../presentation/screens/onboarding/onboarding_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/dashboard/dashboard_screen.dart';
 import '../../presentation/screens/analytics/analytics_screen.dart';
+import '../../presentation/screens/notifications/notifications_screen.dart';
 import '../../presentation/screens/budgets/budgets_screen.dart';
 import '../../presentation/screens/budgets/add_budget_screen.dart';
 import '../../presentation/screens/transactions/add_transaction_screen.dart';
@@ -99,6 +100,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
         ],
+      ),
+
+      // Notifications
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationsScreen(),
       ),
 
       // Transaction flows

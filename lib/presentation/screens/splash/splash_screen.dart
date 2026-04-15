@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/providers/database_providers.dart';
@@ -40,7 +39,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: FyniqColors.background,
+      backgroundColor: FyniqColors.backgroundAlt,
       body: Stack(
         children: [
           Positioned(
@@ -59,37 +58,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [FyniqColors.primaryAccent, FyniqColors.highlightCTA]),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [BoxShadow(color: FyniqColors.primaryAccent.withOpacity(0.4), blurRadius: 20)],
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(40),
+                  child: Image.asset(
+                    'assets/images/fyniq_logo.png',
+                    width: 160,
+                    height: 160,
                   ),
-                  child: Center(
-                    child: Text("F",
-                            style: GoogleFonts.plusJakartaSans(
-                                fontSize: 48, fontWeight: FontWeight.w800, color: Colors.white))
-                        .animate(onPlay: (c) => c.repeat(reverse: true))
-                        .moveY(begin: -8, end: 8, duration: 1500.ms, curve: Curves.easeInOut),
-                  ),
-                ).animate().scale(duration: 600.ms, curve: Curves.elasticOut),
-                const SizedBox(height: 24),
-                Text(
-                  "FYNIQ",
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 4,
-                    color: Colors.white,
-                  ),
-                ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2),
-                const SizedBox(height: 8),
-                Text(
-                  "Outsmart your spending.",
-                  style: FyniqTextStyles.caption.copyWith(color: Colors.grey, letterSpacing: 1),
-                ).animate().fadeIn(delay: 500.ms),
+                )
+                    .animate(onPlay: (c) => c.repeat(reverse: true))
+                    .moveY(begin: -8, end: 8, duration: 1500.ms, curve: Curves.easeInOut)
+                    .animate()
+                    .scale(duration: 600.ms, curve: Curves.elasticOut),
               ],
             ),
           ),

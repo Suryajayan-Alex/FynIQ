@@ -239,7 +239,7 @@ class _PageDots extends StatelessWidget {
           width: isSelected ? 24 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.grey,
+            color: isSelected ? FyniqColors.primaryAccent : Colors.grey[300],
             borderRadius: BorderRadius.circular(4),
           ),
         );

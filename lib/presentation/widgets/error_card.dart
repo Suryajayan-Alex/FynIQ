@@ -21,7 +21,7 @@ class ErrorCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text("Something went wrong", style: FyniqTextStyles.headingM, textAlign: TextAlign.center),
           const SizedBox(height: 4),
-          Text(message, style: FyniqTextStyles.caption.copyWith(color: Colors.grey), textAlign: TextAlign.center),
+          Text(message, style: FyniqTextStyles.caption.copyWith(color: FyniqColors.textSecondary), textAlign: TextAlign.center),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
             TextButton(

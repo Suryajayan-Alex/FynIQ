@@ -5,7 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/fyniq_scaffold.dart';
 
 class HomeScreen extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -22,7 +21,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FyniqScaffold(
+    return Scaffold(
+      backgroundColor: FyniqColors.background,
       body: Stack(
         children: [
           navigationShell,
@@ -34,7 +34,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           Align(
-            alignment: const Alignment(0, 0.82),
+            alignment: const Alignment(0, 0.88),
             child: _FyniqFAB(
               onTap: () => context.push('/add-transaction'),
             ),
@@ -63,9 +63,16 @@ class _FyniqBottomNav extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
+              color: Colors.white.withOpacity(0.85),
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: Colors.white.withOpacity(0.12)),
+              border: Border.all(color: Colors.white.withOpacity(0.6)),
+              boxShadow: [
+                BoxShadow(
+                  color: FyniqColors.primaryAccent.withOpacity(0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, -4),
+                ),
+              ],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -78,14 +85,14 @@ class _FyniqBottomNav extends StatelessWidget {
                 ),
                 _NavItem(
                   icon: Iconsax.chart_2,
-                  label: "Analytics",
+                  label: "Report",
                   isSelected: currentIndex == 1,
                   onTap: () => onTap(1),
                 ),
                 const SizedBox(width: 48), // Space for FAB
                 _NavItem(
                   icon: Iconsax.wallet_2,
-                  label: "Budgets",
+                  label: "Plan",
                   isSelected: currentIndex == 2,
                   onTap: () => onTap(2),
                 ),
@@ -130,16 +137,23 @@ class _NavItem extends StatelessWidget {
             color: isSelected ? FyniqColors.primaryAccent : FyniqColors.textSecondary,
             size: 24,
           ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              color: isSelected ? FyniqColors.primaryAccent : FyniqColors.textSecondary,
+            ),
+          ),
           if (isSelected)
             Container(
-              margin: const EdgeInsets.only(top: 4),
-              width: 6,
-              height: 6,
+              margin: const EdgeInsets.only(top: 2),
+              width: 5,
+              height: 5,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [FyniqColors.primaryAccent, FyniqColors.highlightCTA],
-                ),
+                color: FyniqColors.primaryAccent,
               ),
             ),
         ],
@@ -160,35 +174,28 @@ class _FyniqFAB extends StatelessWidget {
         onTap();
       },
       child: Container(
-        width: 140,
-        height: 52,
+        width: 56,
+        height: 56,
         decoration: BoxDecoration(
           gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [FyniqColors.primaryAccent, FyniqColors.highlightCTA],
           ),
-          borderRadius: BorderRadius.circular(26),
+          shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
               color: FyniqColors.primaryAccent.withOpacity(0.4),
-              blurRadius: 20,
+              blurRadius: 16,
               spreadRadius: 2,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Iconsax.add, color: Colors.white, size: 24),
-            SizedBox(width: 8),
-            Text(
-              "Add",
-              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
-            ),
-          ],
-        ),
+        child: const Icon(Iconsax.add, color: Colors.white, size: 28),
       )
       .animate(onPlay: (c) => c.repeat(reverse: true))
-      .scaleXY(begin: 1.0, end: 1.03, duration: 1500.ms, curve: Curves.easeInOutCubic),
+      .scaleXY(begin: 1.0, end: 1.05, duration: 1500.ms, curve: Curves.easeInOutCubic),
     );
   }
 }

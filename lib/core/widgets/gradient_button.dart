@@ -7,6 +7,7 @@ class GradientButton extends StatelessWidget {
   final bool isLoading;
   final IconData? icon;
   final double? width;
+  final List<Color>? colors;
   final double? height;
 
   const GradientButton({
@@ -16,6 +17,7 @@ class GradientButton extends StatelessWidget {
     this.isLoading = false,
     this.icon,
     this.width,
+    this.colors,
     this.height,
   });
 
@@ -28,8 +30,8 @@ class GradientButton extends StatelessWidget {
         height: height ?? 56,
         width: width ?? double.infinity,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [FyniqColors.primaryAccent, FyniqColors.highlightCTA],
+          gradient: LinearGradient(
+            colors: colors ?? const [FyniqColors.primaryAccent, FyniqColors.highlightCTA],
           ),
           borderRadius: BorderRadius.circular(14),
           boxShadow: [

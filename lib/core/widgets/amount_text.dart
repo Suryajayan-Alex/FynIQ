@@ -6,17 +6,19 @@ import '../theme/app_theme.dart';
 class AmountText extends StatelessWidget {
   final double amount;
   final double fontSize;
-  final Color color;
+  final Color? color;
   final bool showSign;
   final bool isHidden;
+  final String type; // 'expense' or 'income'
 
   const AmountText({
     super.key,
     required this.amount,
     this.fontSize = 24,
-    this.color = FyniqColors.textPrimary,
+    this.color,
     this.showSign = false,
     this.isHidden = false,
+    this.type = 'expense',
   });
 
   @override
@@ -30,10 +32,17 @@ class AmountText extends StatelessWidget {
         symbol: '₹',
         decimalDigits: 2,
       ).format(amount);
-      if (showSign && amount > 0) {
-        formatted = "+$formatted";
+      
+      if (showSign) {
+        if (type == 'income') {
+          formatted = "+ $formatted";
+        } else {
+          formatted = "- $formatted";
+        }
       }
     }
+
+    final displayColor = color ?? (type == 'income' ? FyniqColors.success : const Color(0xFFEF4444));
 
     return Semantics(
       label: isHidden ? 'Hidden Amount' : 'Amount: $formatted',
@@ -43,7 +52,7 @@ class AmountText extends StatelessWidget {
         style: GoogleFonts.spaceGrotesk(
           fontSize: fontSize,
           fontWeight: FontWeight.w700,
-          color: color,
+          color: displayColor,
         ),
       ),
     );

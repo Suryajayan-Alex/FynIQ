@@ -57,7 +57,7 @@ class CustomNumpad extends StatelessWidget {
                       ? const Icon(Icons.backspace_rounded, color: FyniqColors.highlightCTA)
                       : Text(
                           key,
-                          style: GoogleFonts.spaceGrotesk(fontSize: 22, fontWeight: FontWeight.w600),
+                          style: GoogleFonts.spaceGrotesk(fontSize: 22, fontWeight: FontWeight.w600, color: FyniqColors.textPrimary),
                         ),
                 ),
               ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/fyniq_scaffold.dart';
@@ -64,22 +63,13 @@ class _BiometricGateScreenState extends ConsumerState<BiometricGateScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [FyniqColors.primaryAccent, FyniqColors.highlightCTA],
-                ),
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    color: FyniqColors.primaryAccent.withOpacity(0.5),
-                    blurRadius: 32,
-                  ),
-                ],
+            ClipRRect(
+              borderRadius: BorderRadius.circular(32),
+              child: Image.asset(
+                'assets/images/fyniq_logo.png',
+                width: 120,
+                height: 120,
               ),
-              child: const Icon(Iconsax.lock, color: Colors.white, size: 44),
             ).animate().fadeIn(duration: 500.ms).scale(begin: const Offset(0.5, 0.5), curve: Curves.elasticOut),
             const SizedBox(height: 32),
             Text("Unlock Fyniq 🔐", style: FyniqTextStyles.headingL, textAlign: TextAlign.center)

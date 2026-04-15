@@ -72,7 +72,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Category 🏷️", style: FyniqTextStyles.caption.copyWith(color: Colors.grey)),
+              Text("Category 🏷️", style: FyniqTextStyles.caption.copyWith(color: FyniqColors.textSecondary)),
               const SizedBox(height: 12),
               categoriesAsync.when(
                 data: (cats) => SingleChildScrollView(
@@ -111,7 +111,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
               ),
               const SizedBox(height: 24),
 
-              Text("Budget Name 📝", style: FyniqTextStyles.caption.copyWith(color: Colors.grey)),
+              Text("Budget Name 📝", style: FyniqTextStyles.caption.copyWith(color: FyniqColors.textSecondary)),
               const SizedBox(height: 8),
               TextField(
                 controller: _nameController,
@@ -120,7 +120,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
               ),
               const SizedBox(height: 24),
 
-              Text("Spending Limit 💸", style: FyniqTextStyles.caption.copyWith(color: Colors.grey)),
+              Text("Spending Limit 💸", style: FyniqTextStyles.caption.copyWith(color: FyniqColors.textSecondary)),
               const SizedBox(height: 16),
               Center(
                 child: Column(
@@ -164,7 +164,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
               ),
               const SizedBox(height: 24),
 
-              Text("Resets Every 🔄", style: FyniqTextStyles.caption.copyWith(color: Colors.grey)),
+              Text("Resets Every 🔄", style: FyniqTextStyles.caption.copyWith(color: FyniqColors.textSecondary)),
               const SizedBox(height: 12),
               Row(
                 children: ['weekly', 'monthly'].map((period) {
@@ -196,7 +196,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                                 period == 'weekly' ? "Weekly" : "Monthly",
                                 style: FyniqTextStyles.body.copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: isSelected ? Colors.white : FyniqColors.textSecondary,
+                                  color: isSelected ? FyniqColors.textPrimary : FyniqColors.textSecondary,
                                 ),
                               ),
                             ),

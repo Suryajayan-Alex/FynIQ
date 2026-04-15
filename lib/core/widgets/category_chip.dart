@@ -48,7 +48,7 @@ class CategoryChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : FyniqColors.textSecondary,
+                color: isSelected ? FyniqColors.textPrimary : FyniqColors.textSecondary,
               ),
             ),
           ],

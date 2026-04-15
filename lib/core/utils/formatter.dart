@@ -41,4 +41,12 @@ class FyniqFormatter {
       default: return 'This Month';
     }
   }
+
+  /// Formats amount without currency symbol (for cases where ₹ is added separately)
+  static String formatAmount(double amount) {
+    if (amount >= 10000000) return '${(amount / 10000000).toStringAsFixed(1)}Cr';
+    if (amount >= 100000) return '${(amount / 100000).toStringAsFixed(1)}L';
+    if (amount >= 1000) return NumberFormat('#,##,###', 'en_IN').format(amount.round());
+    return amount.toStringAsFixed(amount.truncateToDouble() == amount ? 0 : 2);
+  }
 }

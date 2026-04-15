@@ -16,43 +16,32 @@ Future<void> main() async {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
   ));
 
   // Initialize notifications
   final notificationService = NotificationService.instance;
-  await notificationService.initialize();
-  await notificationService.requestPermission();
+  try {
+    await notificationService.initialize();
+    await notificationService.requestPermission();
+  } catch (e) {
+    debugPrint("Notification initialization failed: $e");
+  }
 
   // Initialize timezones
-  tz.initializeTimeZones();
-  // Using Asia/Kolkata as default per prompt
-  tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
-
-  // Use ProviderContainer to check recurring transactions before UI starts
-  final container = ProviderContainer();
   try {
-    final recurringService = container.read(recurringServiceProvider);
-    final count = await recurringService.checkAndAutoLog();
-
-    if (count > 0) {
-      await notificationService.plugin.show(
-        99,
-        '🔁 Auto-logged!',
-        '$count recurring expense(s) auto-logged. Stay sharp.',
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'fyniq_budget_alerts',
-            'Budget Alerts',
-            importance: Importance.high,
-            priority: Priority.high,
-            color: Color(0xFFEC4899),
-          ),
-        ),
-      );
-    }
+    tz.initializeTimeZones();
+    // Using Asia/Kolkata as default
+    tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
   } catch (e) {
-    debugPrint("Failed to log recurring: $e");
+    debugPrint("Timezone initialization failed: $e");
+    // Fallback or ignore if not critical for startup
   }
+
+  final container = ProviderContainer();
+
+  // Run startup tasks asynchronously after starting the app
+  _runBackgroundTasks(container, notificationService);
 
   runApp(
     UncontrolledProviderScope(
@@ -60,6 +49,42 @@ Future<void> main() async {
       child: const FyniqApp(),
     ),
   );
+}
+
+Future<void> _runBackgroundTasks(ProviderContainer container, NotificationService notificationService) async {
+  try {
+    final recurringService = container.read(recurringServiceProvider);
+    final count = await recurringService.checkAndAutoLog();
+
+    if (count > 0) {
+      final notifRepo = container.read(notificationRepositoryProvider);
+      final title = '🔁 Auto-logged!';
+      final body = '$count recurring expense(s) auto-logged. Stay sharp.';
+      
+      await notificationService.plugin.show(
+        99,
+        title,
+        body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'fyniq_budget_alerts',
+            'Budget Alerts',
+            importance: Importance.high,
+            priority: Priority.high,
+            color: Color(0xFF22D3EE),
+          ),
+        ),
+      );
+
+      await notifRepo.addNotification(
+        title: title,
+        body: body,
+        type: 'recurring',
+      );
+    }
+  } catch (e) {
+    debugPrint("Failed to log recurring items: $e");
+  }
 }
 
 class FyniqApp extends ConsumerWidget {
